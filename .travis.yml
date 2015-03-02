@@ -1,0 +1,76 @@
+language: php
+php:
+  - 5.5
+  - 5.4
+
+branches:
+  only:
+    - master
+
+matrix:
+  fast_finish: true
+
+install:
+  # ---------------------
+  # Install Drush
+  # ---------------------
+  - export PATH="$HOME/.composer/vendor/bin:$PATH"
+  - composer global require drush/drush:dev-master
+
+before_script:
+  - echo 'sendmail_path = /bin/true' >> ~/.phpenv/versions/$(phpenv version-name)/etc/conf.d/travis.ini
+
+  # ---------------------
+  # Variables
+  # ---------------------
+  - export DIR=`pwd`'/'
+  - cd ../../
+  - export ROOT=`pwd`'/'
+
+  # ---------------------
+  # Install the production & staging sites
+  # ---------------------
+  - drush core-quick-drupal -y --profile=testing --server=localhost:8989 --root=$ROOT/drupal-production
+  - drush core-quick-drupal -y --profile=testing --server=localhost:8990 --root=$ROOT/drupal-staging
+  - sleep 10
+
+  # ---------------------
+  # Create central git repository
+  # ---------------------
+  - cp -rf $ROOT/drupal-production $ROOT/drupal-origin
+  - cd $ROOT/drupal-origin
+  - rm -y $ROOT/drupal-origin/sites/default/settings.php
+  - git init $ROOT/drupal-origin
+  - echo v1 > foo.txt
+  - git add *
+  - git add .gitignore
+  - git add .htaccess
+  - git commit -m 'Initial commit'
+
+  # ---------------------
+  # Git for Drupal instances
+  # ---------------------
+  - cp -rf $ROOT/drupal-origin/.git/ $ROOT/drupal-production/.git/
+  - cp -rf $ROOT/drupal-origin/.git/ $ROOT/drupal-staging/.git/
+  - cd $ROOT/drupal-production/; git remote add origin $ROOT/drupal-origin
+  - cd $ROOT/drupal-staging/; git remote add origin $ROOT/drupal-origin
+
+  # ---------------------
+  # Make change for origin repository, will check git pull later in a test case
+  # ---------------------
+  - cd $ROOT/drupal-origin
+  - echo v2 > foo.txt
+  - git commit foo.txt -m "New version for foo.txt"
+
+  # ---------------------
+  # Install the drupal deploy instance
+  # ---------------------
+  - cd $DIR
+  - composer install --dev
+  - cp config.sample.php config.php
+  - php -S localhost:8991 -t $DIR/public/ $DIR/public/index.php
+
+script: phpunit
+
+notifications:
+  email: false
