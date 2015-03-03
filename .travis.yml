@@ -1,11 +1,12 @@
 language: php
 php:
-  - 5.5
   - 5.4
+  - 5.5
 
 branches:
   only:
     - master
+    - dev
 
 matrix:
   fast_finish: true
