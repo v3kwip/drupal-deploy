@@ -21,7 +21,8 @@ install:
   # Setup DB
   # ---------------------
   - mysql -e 'SET GLOBAL wait_timeout = 5400;'
-  - mysql -e 'create database drupal;'
+  - mysql -e 'create database drupal_production;'
+  - mysql -e 'create database drupal_staging;'
 
   # ---------------------
   # Install Drush
@@ -67,10 +68,10 @@ before_script:
   # Install the production & staging sites
   # ---------------------
   - cd $ROOT/drupal-production/
-  - drush si -y --db-prefix=production_ --db-url=mysql://root:@localhost/drupal
+  - drush si -y --db-url=mysql://root:@localhost/drupal_production
   - drush run-server --server=builtin 127.0.0.1:8989 &
   - cd $ROOT/drupal-staging/
-  - drush si -y --db-prefix=staging_ --db-url=mysql://root:@localhost/drupal
+  - drush si -y --db-url=mysql://root:@localhost/drupal_staging
   - drush run-server --server=builtin 127.0.0.1:8990 &
 
   # ---------------------
