@@ -69,10 +69,10 @@ before_script:
   # ---------------------
   - cd $ROOT/drupal-production/
   - drush si -y --db-url=mysql://root:@localhost/drupal_production
-  - drush run-server --server=builtin 127.0.0.1:8989 &
+  - drush rs --server=builtin 127.0.0.1:8989 &
   - cd $ROOT/drupal-staging/
   - drush si -y --db-url=mysql://root:@localhost/drupal_staging
-  - drush run-server --server=builtin 127.0.0.1:8990 &
+  - drush rs --server=builtin 127.0.0.1:8990 &
 
   # ---------------------
   # Install the drupal deploy instance
