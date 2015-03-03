@@ -46,7 +46,7 @@ before_script:
   - cd $ROOT/drupal-origin
   - echo v1 > foo.txt
   - git add foo.txt
-  - git commit foo.txt -m --author="First Last <first.last@mailinator.com>" 'First version for foo.txt'
+  - git commit foo.txt --author="First Last <first.last@mailinator.com>" -m 'First version for foo.txt'
 
   # ---------------------
   # Git for Drupal instances
@@ -59,7 +59,7 @@ before_script:
   # ---------------------
   - cd $ROOT/drupal-origin
   - echo v2 > foo.txt
-  - git commit foo.txt --author="First Last <first.last@mailinator.com>" foo.txt -m "New version for foo.txt"
+  - git commit foo.txt --author="First Last <first.last@mailinator.com>" -m "New version for foo.txt"
 
   # ---------------------
   # Install the production & staging sites
