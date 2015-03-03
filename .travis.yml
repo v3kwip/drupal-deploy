@@ -43,6 +43,7 @@ before_script:
   # Create central git repository
   # ---------------------
   - git clone --single-branch --branch=7.x https://github.com/drupal/drupal.git $ROOT/drupal-origin
+  - cd $ROOT/drupal-origin
   - echo v1 > foo.txt
   - git add foo.txt
   - git commit -m 'First version for foo.txt'
