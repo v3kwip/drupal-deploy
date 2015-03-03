@@ -46,7 +46,7 @@ before_script:
   - cd $ROOT/drupal-origin
   - echo v1 > foo.txt
   - git add foo.txt
-  - git commit -m 'First version for foo.txt'
+  - git commit -m --author="First Last <first.last@mailinator.com>" 'First version for foo.txt'
 
   # ---------------------
   # Git for Drupal instances
