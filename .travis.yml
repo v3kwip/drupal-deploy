@@ -11,7 +11,18 @@ branches:
 matrix:
   fast_finish: true
 
+mysql:
+  database: drupal
+  username: root
+  encoding: utf8
+
 install:
+  # ---------------------
+  # Setup DB
+  # ---------------------
+  - mysql -e 'SET GLOBAL wait_timeout = 5400;'
+  - mysql -e 'create database drupal;'
+
   # ---------------------
   # Install Drush
   # ---------------------
@@ -29,32 +40,18 @@ before_script:
   - export ROOT=`pwd`'/'
 
   # ---------------------
-  # Install the production & staging sites
-  # ---------------------
-  - drush core-quick-drupal -y --profile=testing --server=localhost:8989 --root=$ROOT/drupal-production
-  - drush core-quick-drupal -y --profile=testing --server=localhost:8990 --root=$ROOT/drupal-staging
-  - sleep 10
-
-  # ---------------------
   # Create central git repository
   # ---------------------
-  - cp -rf $ROOT/drupal-production $ROOT/drupal-origin
-  - cd $ROOT/drupal-origin
-  - rm -y $ROOT/drupal-origin/sites/default/settings.php
-  - git init $ROOT/drupal-origin
+  - git clone --single-branch --branch=7.x https://github.com/drupal/drupal.git $ROOT/drupal-origin
   - echo v1 > foo.txt
-  - git add *
-  - git add .gitignore
-  - git add .htaccess
-  - git commit -m 'Initial commit'
+  - git add foo.txt
+  - git commit -m 'First version for foo.txt'
 
   # ---------------------
   # Git for Drupal instances
   # ---------------------
-  - cp -rf $ROOT/drupal-origin/.git/ $ROOT/drupal-production/.git/
-  - cp -rf $ROOT/drupal-origin/.git/ $ROOT/drupal-staging/.git/
-  - cd $ROOT/drupal-production/; git remote add origin $ROOT/drupal-origin
-  - cd $ROOT/drupal-staging/; git remote add origin $ROOT/drupal-origin
+  - git clone $ROOT/drupal-origin $ROOT/drupal-production/
+  - git clone $ROOT/drupal-origin $ROOT/drupal-staging/
 
   # ---------------------
   # Make change for origin repository, will check git pull later in a test case
@@ -64,12 +61,22 @@ before_script:
   - git commit foo.txt -m "New version for foo.txt"
 
   # ---------------------
+  # Install the production & staging sites
+  # ---------------------
+  - cd $ROOT/drupal-production/
+  - drush si -y --db-prefix=production_ --db-url=mysql://root:@localhost/drupal
+  - drush run-server --server=builtin 127.0.0.1:8989 &
+  - cd $ROOT/drupal-staging/
+  - drush si -y --db-prefix=staging_ --db-url=mysql://root:@localhost/drupal
+  - drush run-server --server=builtin 127.0.0.1:8990 &
+
+  # ---------------------
   # Install the drupal deploy instance
   # ---------------------
   - cd $DIR
   - composer install --dev
   - cp config.sample.php config.php
-  - php -S localhost:8991 -t $DIR/public/ $DIR/public/index.php
+  - php -S localhost:8991 -t $DIR/public/ $DIR/public/index.php &
 
 script: phpunit
 
